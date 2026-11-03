@@ -1,0 +1,178 @@
+============================================================
+  SOC WORKBOOK AND ALERT ENRICHMENT REPORT
+============================================================
+
+Analyst:   Joseph Biju
+Platform:  TryHackMe — SOC Level 1
+Room:      SOC Workbooks and Lookups
+Scope:     Practical alert enrichment, network analysis,
+           and structured SOC investigation workflows
+Method:    Gather Context > Investigate > Verify >
+           Document > Escalate or Close
+
+
+------------------------------------------------------------
+  1. SUMMARY
+------------------------------------------------------------
+
+This exercise explored how SOC analysts use identity
+inventories, asset inventories, network diagrams, and
+investigation workbooks to improve alert triage.
+
+The practical tasks involved validating file-sharing
+activity, investigating network connections, and building
+repeatable workflows for suspicious email attachments,
+PowerShell downloads, and internal port scanning.
+
+The exercise highlighted the importance of gathering
+relevant context before deciding whether activity is
+legitimate or requires further investigation.
+
+
+------------------------------------------------------------
+  2. PRACTICAL SCENARIO ANALYSIS
+------------------------------------------------------------
+
+  Scenario 1 — External File Sharing
+
+  Indicators:
+    - A user accessed a financial records server
+    - A financial report was shared with another employee
+    - User roles and server purpose required verification
+
+  Assessment:
+    Identity and asset inventories were used to determine
+    whether the file-sharing activity matched the users'
+    responsibilities and the server's business purpose.
+
+  Recommended Action:
+    Verify user roles, access permissions, and the business
+    reason for sharing before classifying the alert.
+
+
+  Scenario 2 — Suspicious Network Activity
+
+  Indicators:
+    - Network connections involved a specific IP address
+    - A service was exposed on TCP port 10443
+    - Network segments and server location required review
+
+  Assessment:
+    The network diagram helped identify the exposed service
+    and the relevant subnet, providing context to assess
+    whether the observed activity was suspicious.
+
+  Recommended Action:
+    Map the source and destination to the correct network
+    segments, review the relevant connection activity,
+    and escalate if the evidence indicates a potential
+    security incident.
+
+
+  Scenario 3 — External Email with Script or Binary Attachment
+
+  Indicators:
+    - An email originated from an external source
+    - The message contained a script or binary attachment
+    - The attachment required security investigation
+
+  Assessment:
+    The attachment could represent a malware delivery
+    attempt and required validation before determining
+    whether the alert was a genuine threat.
+
+  Recommended Action:
+    Review the email and attachment details, gather
+    available user and system context, document findings,
+    and escalate suspicious activity.
+
+
+  Scenario 4 — Executable Downloaded Through PowerShell
+
+  Indicators:
+    - PowerShell was involved in downloading an executable
+    - The activity required investigation of its source
+    - The downloaded file could pose an endpoint risk
+
+  Assessment:
+    PowerShell can be used for legitimate administration
+    as well as malicious downloads. The activity must be
+    evaluated using its context and supporting evidence.
+
+  Recommended Action:
+    Review the process and download details, check the
+    file's source and related endpoint activity, and
+    escalate if malicious behaviour is suspected.
+
+
+  Scenario 5 — Internal Port Scanning
+
+  Indicators:
+    - Port-scanning activity originated from an internal IP
+    - Multiple ports or internal systems may have been probed
+    - Source-host identity and network location required review
+
+  Assessment:
+    Internal scanning may indicate reconnaissance, but
+    authorised administrative activity must also be
+    considered before assigning a verdict.
+
+  Recommended Action:
+    Identify the source asset, examine connection patterns,
+    verify whether the activity was authorised, and
+    document the evidence for closure or escalation.
+
+
+------------------------------------------------------------
+  3. KEY FINDINGS
+------------------------------------------------------------
+
+  - Identity inventories help validate user roles and
+    expected access to organisational resources.
+
+  - Asset inventories provide context about system purpose,
+    ownership, and the sensitivity of stored information.
+
+  - Network diagrams help analysts interpret IP addresses,
+    exposed services, and network segmentation.
+
+  - Enrichment improves investigation by combining alert
+    details with relevant user, host, and network context.
+
+  - Structured workbooks make investigations repeatable
+    and support consistent escalation decisions.
+
+
+------------------------------------------------------------
+  4. RECOMMENDED SECURITY CONTROLS
+------------------------------------------------------------
+
+  Preventive Controls:
+    Apply least-privilege access, maintain accurate asset
+    inventories, and restrict unnecessary network exposure.
+
+  Detective Controls:
+    Monitor suspicious attachments, unusual PowerShell
+    activity, and unexpected internal network scanning.
+
+  Response Measures:
+    Follow documented investigation workflows, preserve
+    relevant evidence, record the alert verdict, and
+    escalate unresolved or high-risk activity appropriately.
+
+
+------------------------------------------------------------
+  5. CONCLUSION
+------------------------------------------------------------
+
+The exercise demonstrated how corporate inventories,
+network diagrams, and structured workbooks support
+effective SOC alert triage. Gathering context before
+reaching a verdict helps analysts distinguish legitimate
+activity from potential threats and make more consistent
+investigation decisions.
+
+============================================================
+  END OF REPORT
+============================================================
+

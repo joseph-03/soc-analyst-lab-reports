@@ -1,0 +1,217 @@
+============================================================
+  EDR ENDPOINT ALERT TRIAGE REPORT
+============================================================
+
+Analyst:   Joseph Biju
+Platform:  TryHackMe — SOC Level 1
+Room:      Introduction to EDR
+Scope:     Endpoint investigation using an EDR console:
+           process trees, telemetry, threat intelligence,
+           and alert triage
+Method:    Review Detection > Inspect Process Tree > Check
+           Threat Intel > Verdict > Respond
+
+
+------------------------------------------------------------
+  1. SUMMARY
+------------------------------------------------------------
+
+This exercise explored how Endpoint Detection and Response
+(EDR) gives SOC analysts the context that traditional
+antivirus lacks. EDR is built on three pillars:
+visibility, detection, and response.
+
+The practical tasks involved reading a process tree,
+comparing how antivirus and EDR handle the same attack
+chain, and triaging detections in a simulated EDR console
+for a company called TECH THM. Detections on three
+endpoints were investigated using process details, command
+lines, network activity, and threat-intelligence labels.
+
+The exercise highlighted that a detection is only useful
+once the surrounding context (parent process, command line,
+file path, and network activity) is checked before deciding
+whether the activity is malicious or benign.
+
+
+------------------------------------------------------------
+  2. PRACTICAL SCENARIO ANALYSIS
+------------------------------------------------------------
+
+  Scenario 1 — Process Tree Analysis
+
+  Indicators:
+    - A process tree showed related processes on an endpoint
+    - sc.exe appeared as a child of another process
+
+  Assessment:
+    Reading the tree showed that cmd.exe spawned sc.exe.
+    Each node is a process and each line is a parent-child
+    relationship, so the tree gives the full sequence of
+    actions rather than a single isolated event.
+
+  Recommended Action:
+    Always trace the parent process and its timeline
+    before judging a single process.
+
+
+  Scenario 2 — Antivirus vs EDR Attack Chain
+
+  Indicators:
+    - Phishing email with a malicious Word document
+    - Macro launching PowerShell with an obfuscated script
+    - Payload injected into the legitimate svchost.exe
+    - Outbound connection giving the attacker remote access
+
+  Assessment:
+    Antivirus relies on known signatures and does not watch
+    memory, so it may mark this chain as clean. EDR
+    records each step, flags the unusual process behaviour,
+    detects the injection into svchost.exe, and alerts on
+    the full attack chain.
+
+  Recommended Action:
+    Rely on behaviour-based detection alongside antivirus,
+    not signatures alone.
+
+
+  Scenario 3 — DESKTOP-HR01: Malicious Macro Document
+
+  Indicators:
+    - invoice.docm, a macro-enabled document, was opened in
+      WINWORD.EXE
+    - The document launched cmd.exe, which ran cURL.exe
+    - Payload downloaded from an external domain to
+      C:\Users\Public\install.exe
+    - The file was saved to disk but not executed
+
+  Assessment:
+    This is a true positive. Office spawning a command
+    shell that downloads an executable is a classic
+    malware-staging pattern. The Process Info tab gave the
+    tool name (cURL.exe) and the full command line, which
+    showed exactly where the payload was dropped.
+
+  Recommended Action:
+    Isolate or monitor the host, quarantine install.exe,
+    block the external domain, and confirm the payload
+    never ran.
+
+
+  Scenario 4 — WIN-ENG-LAPTOP03: Credential Dumping
+
+  Indicators:
+    - Detection: Credential Dumping via LSASS Memory Access
+    - Suspicious process syncsvc.exe running from
+      C:\Users\haris.khan\AppData\Local\Temp\syncsvc.exe
+    - Attempted upload of a memory dump (dump_2025.dmp) to
+      https://files-wetransfer.com/upload/session/
+      ab12cd34ef56/ (a lookalike file-sharing domain)
+
+  Assessment:
+    This is a true positive of high concern. Accessing
+    LSASS memory is a known way to steal credentials, a
+    temp-folder executable with a service-like name is
+    suspicious, and the upload attempt suggests data
+    exfiltration. The network activity section of the
+    detection supplied the destination URL.
+
+  Recommended Action:
+    Isolate the host, terminate the process, collect
+    forensic artefacts, reset the affected user's
+    credentials, block the domain, and escalate as an
+    incident.
+
+
+  Scenario 5 — DESKTOP-DEV01: Execution from AppData
+
+  Indicators:
+    - Detection: Execution from AppData Directory
+    - Process: UpdateAgent.exe
+    - Threat intelligence label: known internal IT utility
+      tool
+
+  Assessment:
+    The location alone looked suspicious, but the
+    threat-intelligence enrichment identified the file as
+    a legitimate internal tool. This is most likely a false
+    positive, which shows why context matters before
+    escalating.
+
+  Recommended Action:
+    Verify with IT that the tool is expected, record the
+    verdict, and consider tuning the rule so approved
+    tools do not trigger repeat alerts.
+
+
+------------------------------------------------------------
+  3. KEY FINDINGS
+------------------------------------------------------------
+
+  - Visibility is the pillar that gives each detection its
+    full context, including the process tree, command line,
+    and activity timeline.
+
+  - Behaviour-based detection catches attacks that
+    signature-based antivirus can miss, such as macros
+    spawning PowerShell and injection into svchost.exe.
+
+  - Telemetry such as process activity, command lines,
+    network connections, file and registry changes lets an
+    analyst rebuild an attack timeline.
+
+  - Threat-intelligence labels help separate real threats
+    from legitimate tools that look suspicious, as with
+    UpdateAgent.exe.
+
+  - Of the three console detections investigated, two were
+    true threats (malware staging and credential dumping)
+    and one was most likely benign, so each needed its
+    own verdict.
+
+  - EDR covers endpoints only. It works best alongside
+    SIEM, firewalls, email security, and identity controls.
+
+
+------------------------------------------------------------
+  4. RECOMMENDED SECURITY CONTROLS
+------------------------------------------------------------
+
+  Preventive Controls:
+    Block or restrict macros in documents from the
+    internet, prevent Office applications from launching
+    command shells, protect LSASS memory, restrict
+    execution from user-writable folders, and filter
+    outbound access to lookalike file-sharing domains.
+
+  Detective Controls:
+    Monitor for Office-to-cmd/PowerShell chains, LSASS
+    access, executables running from AppData or temp
+    folders, and unusual uploads. Use IOC matching and
+    MITRE ATT&CK mapping to add context to alerts.
+
+  Response Measures:
+    Isolate affected hosts, terminate malicious processes,
+    quarantine files, collect forensic artefacts, reset
+    exposed credentials, record the verdict and evidence,
+    and escalate high-risk detections.
+
+
+------------------------------------------------------------
+  5. CONCLUSION
+------------------------------------------------------------
+
+The exercise demonstrated how EDR turns a bare alert into an
+investigation: the process tree, command line, network
+activity, and threat intelligence together show what
+happened and how serious it is. Triaging three endpoints
+showed the difference between malware staging, credential
+theft with an exfiltration attempt, and a legitimate
+internal tool, and that each needs a different response.
+Checking context before reaching a verdict is what lets an
+analyst act quickly on real threats without escalating
+harmless activity.
+
+============================================================
+  END OF REPORT
+============================================================

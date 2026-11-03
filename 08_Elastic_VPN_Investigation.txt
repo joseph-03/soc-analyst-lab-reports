@@ -1,0 +1,214 @@
+============================================================
+  ELASTIC STACK VPN LOG INVESTIGATION REPORT
+============================================================
+
+Analyst:   Joseph Biju
+Platform:  TryHackMe — SOC Level 1
+Room:      Elastic Stack: The Basics
+Scope:     Elastic Stack components, Kibana Discover,
+           KQL searching, visualisations, and dashboards
+           applied to VPN connection logs
+Method:    Filter by Time > Pivot on Fields > Exclude Normal
+           > Query with KQL > Visualise
+
+
+------------------------------------------------------------
+  1. SUMMARY
+------------------------------------------------------------
+
+This exercise explored how the Elastic Stack (ELK) is used
+by SOC analysts for log analysis. Although it is not a
+traditional SIEM, many teams use it like one because of its
+searching and visualisation strengths.
+
+The practical work covered the roles of the stack's
+components, then an investigation of an organisation's VPN
+logs in Kibana. The investigation included filtering by
+time, finding the most active IPs and users, tracing a
+timeline spike, excluding expected locations, writing KQL
+queries, and building visualisations and a dashboard.
+
+The exercise showed how an analyst can move from a large set
+of raw logs to specific answers by narrowing the data step
+by step, and how visualisations make anomalies easier to
+see.
+
+
+------------------------------------------------------------
+  2. PRACTICAL SCENARIO ANALYSIS
+------------------------------------------------------------
+
+  Scenario 1 — Elastic Stack Component Review
+
+  Indicators:
+    - Components: Beats, Logstash, Elasticsearch, Kibana
+    - Question: is Logstash used to visualise data?
+    - Question: does Elasticsearch support every format
+      except JSON?
+
+  Assessment:
+    Beats are lightweight agents that collect endpoint
+    data. Logstash processes and normalises it through
+    input, filter, and output stages. Elasticsearch stores
+    and searches JSON documents, and Kibana provides the
+    visual interface. Logstash does not visualise data,
+    and Elasticsearch stores JSON, so both statements were
+    false.
+
+  Recommended Action:
+    Treat each component as one stage of a pipeline:
+    collect, process, store, then visualise.
+
+
+  Scenario 2 — Discover Tab: Filtering VPN Logs
+
+  Indicators:
+    - Index selected: vpn_connections
+    - Time range: 31 December 2021 to 2 February 2022
+    - Top Source_Ip value: 238.163.231.224
+    - Top user by traffic: james
+    - Filter on user Emanda: top source IP 107.14.1.247
+
+  Assessment:
+    Applying the time filter returned 2,861 hits. The
+    fields pane showed the top five values for any field,
+    which made it quick to find the busiest IP and user.
+    Adding a filter for a single user then revealed the
+    source IP that user connected from most often.
+
+  Recommended Action:
+    Use the fields pane to pivot between user and IP
+    fields, and check whether the busiest values match
+    what is expected for the environment.
+
+
+  Scenario 3 — Timeline Spike and Exclusion Filter
+
+  Indicators:
+    - Spike on 11 January in the timeline chart
+    - Source IP behind the spike: 172.201.60.191
+    - Source IP 238.163.231.224 with New York State
+      excluded
+
+  Assessment:
+    Selecting the 11 January bar on the timeline limited
+    the logs to that day, and the Source_ip field showed
+    the address that caused the spike. For the second
+    check, filtering IP 238.163.231.224 and excluding New
+    York State left 48 connections, showing how exclusion
+    filters isolate activity from unexpected locations.
+
+  Recommended Action:
+    Investigate spikes by date and IP, and verify whether
+    the activity is legitimate before closing.
+
+
+  Scenario 4 — KQL Queries
+
+  Indicators:
+    - Query for Source_Country "United States" with user
+      James or Albert
+    - Query for user "Johny Brown" with a timestamp after
+      1 January 2022 (the date he was terminated)
+
+  Assessment:
+    The first query combined field searches with AND and
+    OR and returned 161 records. The second searched for
+    VPN activity by a terminated employee after the
+    termination date and found 1 connection. Activity by
+    an account that should no longer be in use is a
+    significant finding, since it could mean the account
+    was not disabled or was being misused.
+
+  Recommended Action:
+    Investigate the connection, confirm whether the
+    account was properly disabled, and review the
+    offboarding process.
+
+
+  Scenario 5 — Visualisations and Dashboard
+
+  Indicators:
+    - Visualisation of failed VPN attempts by user
+    - Count of failed connection attempts by date
+    - Dashboard built from saved visualisations
+
+  Assessment:
+    Charting failed attempts by user showed that the user
+    Simon was the only one with failed connections.
+    A count of failed connections by date gave an answer
+    of 274 failed attempts for January. Saving the
+    visualisations to the library and adding them to a
+    dashboard produced a single view of VPN activity for
+    ongoing monitoring.
+
+  Recommended Action:
+    Keep a dashboard of failed logins, top IPs, and source
+    countries, and review it regularly for changes.
+
+
+------------------------------------------------------------
+  3. KEY FINDINGS
+------------------------------------------------------------
+
+  - Elastic's pipeline is Beats to Logstash to Elasticsearch
+    to Kibana, and each part has a distinct role.
+
+  - The Discover tab is the main investigation workspace,
+    combining time filters, the fields pane, and the
+    timeline chart.
+
+  - Timeline spikes are quick leads: selecting the spike and
+    checking the top values often identifies the source.
+
+  - Exclusion filters help remove expected activity so
+    unusual locations stand out.
+
+  - KQL supports precise queries combining fields, logical
+    operators, and timestamps, such as checking activity
+    after an account should have been disabled.
+
+  - Visualisations and dashboards turn raw events into a
+    view that makes patterns, like failed logins, easy to
+    see.
+
+
+------------------------------------------------------------
+  4. RECOMMENDED SECURITY CONTROLS
+------------------------------------------------------------
+
+  Preventive Controls:
+    Disable accounts promptly when employees leave, enforce
+    multi-factor authentication on VPN access, and limit
+    VPN access by role and location where possible.
+
+  Detective Controls:
+    Ingest VPN logs into Elastic, build dashboards for
+    failed attempts, top source IPs and source countries,
+    and create alerts for activity by terminated or
+    inactive accounts and for unexpected spikes.
+
+  Response Measures:
+    Investigate unusual IPs, spikes, and out-of-policy
+    logins, disable or reset affected accounts, block
+    malicious addresses, and document findings and the
+    queries used.
+
+
+------------------------------------------------------------
+  5. CONCLUSION
+------------------------------------------------------------
+
+The exercise demonstrated a full log-investigation workflow
+in the Elastic Stack: understanding the components,
+filtering VPN logs, tracing a spike, applying exclusions,
+writing KQL queries, and presenting results as
+visualisations and a dashboard. Finding a connection from a
+terminated employee's account showed how a precise query can
+surface a real risk. The same approach of narrowing the
+data, comparing it with what is normal, and investigating
+what remains applies to any log source and tool.
+
+============================================================
+  END OF REPORT
+============================================================

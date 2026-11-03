@@ -1,0 +1,193 @@
+============================================================
+  SIEM ALERT INVESTIGATION REPORT
+============================================================
+
+Analyst:   Joseph Biju
+Platform:  TryHackMe — SOC Level 1
+Room:      Introduction to SIEM
+Scope:     Log source analysis, correlation rule review, and
+           alert investigation in a simulated SIEM
+           dashboard
+Method:    Identify Log Source > Review Rule > Investigate
+           Event > Classify > Respond
+
+
+------------------------------------------------------------
+  1. SUMMARY
+------------------------------------------------------------
+
+This exercise explored how a Security Information and Event
+Management (SIEM) system collects, normalises, and correlates
+logs from many devices so that analysts can detect and
+investigate threats from one place.
+
+The practical work covered four areas: classifying log
+sources, reviewing how logs are ingested, analysing
+correlation rules, and investigating a triggered alert in a
+simulated SIEM dashboard. In the lab, a suspicious process
+raised an alert, which I traced to the user and host
+involved, matched to the rule term that caused it, and
+classified as a true positive.
+
+The exercise showed that individual logs rarely tell the
+whole story. A SIEM adds the context, but the analyst still
+has to interpret the evidence and decide on the response.
+
+
+------------------------------------------------------------
+  2. PRACTICAL SCENARIO ANALYSIS
+------------------------------------------------------------
+
+  Scenario 1 — Log Source Classification
+
+  Indicators:
+    - Registry-related activity
+    - VPN-related activity
+
+  Assessment:
+    Registry activity is host-centric, because it relates
+    to a single endpoint, while VPN activity is
+    network-centric, because it describes communication
+    between devices over a network. Telling the two apart
+    shows which logs to check for a given type of
+    activity, and why both are needed for a full picture.
+
+  Recommended Action:
+    Collect both host and network logs centrally, since a
+    single log source can look harmless on its own.
+
+
+  Scenario 2 — Log Ingestion and Storage
+
+  Indicators:
+    - Logs generated across Windows, Linux, and web servers
+    - Linux log locations including authentication, cron,
+      kernel, and web server logs (HTTP logs under
+      /var/log/httpd)
+
+  Assessment:
+    Logs differ in format and location on each device.
+    Collecting them through agents or forwarders, syslog,
+    port forwarding, or manual upload, and then
+    normalising them into consistent fields, removes the
+    need to access each machine one by one.
+
+  Recommended Action:
+    Ingest all key sources into the SIEM and confirm that
+    log fields are parsed correctly.
+
+
+  Scenario 3 — Correlation Rule Analysis
+
+  Indicators:
+    - Rule: Windows Event ID 104 triggers an
+      "Event Log Cleared" alert
+    - Rule: Event ID 4688 with a process name containing
+      "whoami" triggers a "WHOAMI Command Detected" alert
+    - Example rules: multiple failed logins, a successful
+      login after failures, USB access, and large outbound
+      transfers
+
+  Assessment:
+    Each rule is a logical condition on log fields.
+    Clearing event logs is a typical attempt to hide
+    tracks, and running whoami is common after an attacker
+    gains access. Combining such rules across sources
+    reveals attack patterns, for example a VPN login
+    followed by file access, PowerShell, and an outbound
+    connection.
+
+  Recommended Action:
+    Maintain rules for both log tampering and early
+    post-compromise activity, and review them regularly.
+
+
+  Scenario 4 — Alert Investigation: Suspicious Process
+
+  Indicators:
+    - A suspicious activity simulation triggered an alert
+    - The process cudominer.exe was highlighted
+    - The event log showed the user Chris on host HR_02
+    - The rule matched on the term "miner" in the process
+      name
+
+  Assessment:
+    The process name matched a rule looking for
+    crypto-mining terms, and the behaviour was consistent
+    with unauthorised cryptocurrency mining. After
+    reviewing the event, the rule, and the context, I
+    classified the alert as a true positive and selected
+    the appropriate action in the dashboard.
+
+  Recommended Action:
+    Investigate the host HR_02 further, contact the asset
+    owner, isolate the machine if confirmed, and remove
+    the unauthorised process.
+
+
+------------------------------------------------------------
+  3. KEY FINDINGS
+------------------------------------------------------------
+
+  - Central collection removes the need to inspect each
+    device manually and gives one place to search.
+
+  - Normalisation makes logs from different systems
+    comparable, which makes searching and rule writing
+    simpler.
+
+  - Correlation is the main strength of a SIEM, since
+    events that look harmless alone can form a clear attack
+    pattern when linked together.
+
+  - The alert workflow is consistent: review the alert,
+    check the rule that fired, investigate the event,
+    classify it, and respond.
+
+  - False positives should lead to rule tuning, because an
+    untuned rule can flood analysts with noise.
+
+  - Name-based rules, like the "miner" match, are useful
+    but can be evaded or misfire, so they need supporting
+    context.
+
+
+------------------------------------------------------------
+  4. RECOMMENDED SECURITY CONTROLS
+------------------------------------------------------------
+
+  Preventive Controls:
+    Restrict software installation, use application
+    allowlisting, apply least privilege to user accounts,
+    and protect logs from deletion or tampering.
+
+  Detective Controls:
+    Ingest host and network log sources into the SIEM,
+    maintain correlation rules for log clearing, suspicious
+    commands, failed logins, and unusual outbound traffic,
+    and monitor dashboards for alerts.
+
+  Response Measures:
+    Follow the alert workflow: investigate, classify,
+    contact the asset owner, isolate affected hosts, and
+    block malicious indicators. Tune rules after false
+    positives and document each verdict.
+
+
+------------------------------------------------------------
+  5. CONCLUSION
+------------------------------------------------------------
+
+The exercise showed how a SIEM turns scattered logs into
+useful, searchable evidence. Classifying log sources,
+reviewing ingestion, understanding correlation rules, and
+investigating an alert showed the full path from raw event to
+analyst decision. Tracing the suspicious process to its user
+and host, matching it to the rule, and classifying it as a
+true positive demonstrated the structured approach a SOC
+analyst should follow. It also showed that automation
+supports an analyst's judgement but does not replace it.
+
+============================================================
+  END OF REPORT
+============================================================

@@ -1,0 +1,178 @@
+============================================================
+ LINUX FORENSICS INVESTIGATION
+============================================================
+
+Investigator:    Joseph Biju
+Date:            28 September 2026
+System examined: Practice laptop - HP 240 G8 Notebook PC
+                 (hostname: user-HP-240-G8-Notebook-PC), Ubuntu Linux
+Scenario:        Suspected compromise (staged practice scenario)
+Method:          Live + historical examination; suspicious files
+                 examined without execution
+
+
+------------------------------------------------------------
+ 1. SUMMARY
+------------------------------------------------------------
+
+No independent evidence of a real compromise was found. The only
+suspicious artifacts are the ones I staged myself: a placeholder
+file /tmp/update.sh (created 20:22), ~/evidence_note.txt and
+~/recent_marker.txt. No unknown processes, external listeners,
+rogue accounts, remote logins or cron persistence were found.
+Confidence: medium (staged scenario, limited set of checks).
+
+
+------------------------------------------------------------
+ 2. INVESTIGATOR'S CHECKLIST FINDINGS
+------------------------------------------------------------
+
+PROCESSES (what's running that shouldn't be):
+  Reviewed with ps aux (20:25). Everything is consistent with a
+  normal Ubuntu GNOME desktop: kernel threads, systemd, gdm3,
+  NetworkManager, cupsd, avahi, gnome-shell, Brave browser and
+  Obsidian. No process runs from /tmp or a hidden directory, and
+  no miners, reverse shells or oddly named binaries were seen.
+  The highest CPU users (Brave ~6-7%, Xorg, gnome-shell) match
+  normal desktop use.
+
+NETWORK CONNECTIONS (what it's talking to):
+  ss -tuln shows only local/service listeners: CUPS on 127.0.0.1
+  and [::1]:631, systemd-resolved on 127.0.0.53:53, and mDNS
+  (avahi) on UDP 5353 plus two ephemeral UDP ports (57812, 35434).
+  There are no externally reachable TCP listeners and no SSH
+  (port 22). Note: -l shows listening sockets only; established
+  connections were not checked, and nmap is not installed. I would
+  run ss -tunap to see live connections and owning processes.
+
+LOGS (the history / timeline):
+  Reviewed the tail of /var/log/auth.log. Findings: one failed
+  sudo authentication at 20:29:35 (my own mistyped password,
+  "Sorry, try again"), then a successful sudo at 20:29:44 to read
+  the log. The 20:17:01 root CRON session is the routine hourly
+  job. There are no SSH logins, no failed remote attempts, no
+  account creation and no password changes. Anomaly: the first
+  few lines are stamped Sep 29 01:26, which is out of order with
+  the Sep 28 20:xx entries (likely a clock/timezone change or
+  entries from a different boot). It is worth noting but not
+  proof of tampering.
+
+ACCOUNTS (who exists / who can sudo):
+  /etc/passwd reviewed. The only human account is "user"
+  (UID 1000, /bin/bash). All other accounts are standard system
+  or service accounts with nologin or /bin/false shells. Only root
+  has UID 0. getent group sudo returns only "user". No
+  unexpected accounts or sudo members. (/etc/shadow was not
+  checked.)
+
+SCHEDULED TASKS (persistence):
+  crontab -l for the user is empty (default comments only).
+  /etc/cron.d contains only anacron, e2scrub_all and
+  popularity-contest, which are standard Ubuntu entries. A rogue
+  entry would typically look like a line calling a script in /tmp
+  or a curl/wget download on a short interval, which would
+  indicate persistence. None was found. Not yet reviewed:
+  /etc/crontab, cron.hourly/daily, systemd timers, root's crontab.
+
+FILES (suspicious files):
+  /tmp/update.sh: type ASCII text (per file), -rw-rw-r-- user:user,
+  38 bytes, modified Sep 28 20:22, not executable. Contents
+  (viewed with cat, never executed): "fake malicious placeholder -
+  harmless". Also created: ~/evidence_note.txt and
+  ~/recent_marker.txt (staged markers). A find for recently
+  modified files across the system was not run.
+
+
+------------------------------------------------------------
+ 3. TIMELINE OF EVENTS
+------------------------------------------------------------
+
+  19:55  -  System booted (init and system services start)
+  19:56  -  Desktop session and Brave browser started
+  20:03  -  Obsidian started; keyring warning logged (20:03:08,
+            benign duplicate-item message)
+  20:17  -  Routine hourly root CRON session opened/closed
+  20:21  -  Terminal (bash on pts/0) opened
+  20:22  -  /tmp/update.sh created (staged suspicious file)
+  20:25  -  ps aux run; process list reviewed
+  20:29  -  Failed sudo (20:29:35), then successful sudo
+            (20:29:44) to read /var/log/auth.log
+  01:26  -  (Sep 29) Log entries for session c1 logout, gdm
+            session closed; timestamp out of order (see LOGS)
+
+
+------------------------------------------------------------
+ 4. VERDICT AND CONFIDENCE
+------------------------------------------------------------
+
+Verdict:     NOT COMPROMISED (apart from the staged artifacts)
+Confidence:  MEDIUM
+
+Evidence-based reasoning:
+  Supporting the verdict: the process list is clean, there are
+  no external listeners, auth.log shows no remote logins or
+  account changes, the only sudo-capable account is the owner's,
+  and the user crontab and /etc/cron.d hold nothing unexpected.
+  The one suspicious file, /tmp/update.sh, is a non-executable
+  38-byte text file whose creation matches my own commands at
+  20:22, so it is a known artifact rather than attacker activity.
+  Confidence is medium, not high, because this was a staged
+  scenario and several checks were not done (established
+  connections, shell history, systemd timers, /etc/shadow,
+  system-wide recent-file search, and the log timestamp anomaly).
+
+
+------------------------------------------------------------
+ 5. HOW THE ATTACKER GOT IN AND STAYED
+------------------------------------------------------------
+
+Entry:        None observed. In the staged scenario the file drop
+              was simulated by a local user. A real entry would
+              show up as SSH logins, a vulnerable service, or a
+              malicious download.
+Actions:      Only the staged file creation at 20:22 (/tmp/
+              update.sh, ~/evidence_note.txt, ~/recent_marker.txt).
+              No execution, data access or lateral movement seen.
+Persistence:  None found - no rogue accounts, no cron entries,
+              no new sudo members.
+
+
+------------------------------------------------------------
+ 6. RECOMMENDATIONS
+------------------------------------------------------------
+
+  [ ] Remove the staged file /tmp/update.sh and the marker files
+      ~/evidence_note.txt and ~/recent_marker.txt after the
+      exercise is documented
+  [ ] No rogue accounts found; still keep sudo limited to the
+      owner and use a strong unique password (mistyped sudo
+      attempts show up in the log)
+  [ ] Complete the persistence sweep (miss one, they return):
+      /etc/crontab, cron.hourly/daily/weekly, systemd timers,
+      ~/.bashrc, ~/.profile, ~/.config/autostart, authorized_keys
+  [ ] Apply hardening (Day 64) to prevent recurrence: keep
+      unattended-upgrades on, least privilege, SSH keys only if
+      SSH is enabled, firewall (ufw), and log monitoring
+  [ ] Preserve evidence (copies of the logs and command output
+      with hashes); investigate the Sep 29 01:26 timestamp
+      anomaly; escalate per incident process if it were real
+
+
+------------------------------------------------------------
+ 7. SCOPE AND LIMITATIONS
+------------------------------------------------------------
+
+  This was a staged practice scenario on my own machine, with
+  suspicious files created by me. It demonstrated the checklist
+  workflow: processes, network, logs, accounts, cron and files,
+  and how to examine a file safely without executing it. A real
+  investigation would add memory and disk imaging, established
+  connection and DNS review, full log correlation (auth.log,
+  syslog, journalctl, last/lastb), shell history, file hashing
+  against threat intelligence, checks of the whole filesystem
+  for recent changes, and chain-of-custody documentation.
+
+
+============================================================
+ END OF INVESTIGATION
+============================================================

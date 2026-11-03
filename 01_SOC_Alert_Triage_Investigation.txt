@@ -1,0 +1,102 @@
+============================================================
+  SOC ALERT TRIAGE AND INVESTIGATION REPORT
+============================================================
+
+Platform:  TryHackMe — SOC Level 1
+Room:      SOC L1 Alert Triage
+Scope:     Practical investigation of alerts using a
+           simulated SOC dashboard
+Method:    Prioritise > Investigate > Classify > Document
+
+
+------------------------------------------------------------
+  1. PRACTICAL SCENARIO ANALYSIS
+------------------------------------------------------------
+
+  Scenario 1 — Potential Data Exfiltration
+
+  Indicators:
+    - Critical-severity alert requiring investigation
+    - Alert details associated with Zoom-related activity
+
+  Assessment:
+    The alert required investigation to determine whether
+    the activity represented actual data exfiltration
+    or legitimate business activity.
+
+  Verdict:
+    False Positive — based on the simulated room scenario.
+
+
+  Scenario 2 — Double-Extension File Creation
+
+  Indicators:
+    - File disguised using a double extension
+    - File identified as an executable
+    - File hash associated with a suspected trojan
+
+  Assessment:
+    The file characteristics and threat intelligence
+    findings indicated potentially malicious activity.
+
+  Verdict:
+    True Positive — suspicious file activity was
+    classified as a genuine security threat.
+
+
+  Scenario 3 — Download from GitHub Repository
+
+  Indicators:
+    - File or software downloaded from a GitHub repository
+    - Repository identified as the official React project
+    - Activity required verification before classification
+
+  Assessment:
+    The repository was legitimate, and the activity
+    was classified as benign in the simulated scenario.
+
+  Verdict:
+    False Positive — the alert did not represent
+    a confirmed threat in this exercise.
+
+
+------------------------------------------------------------
+  2. TRIAGE PROCEDURE PERFORMED
+------------------------------------------------------------
+
+    - Reviewed alert properties, including severity,
+      status, description, and associated evidence.
+
+    - Prioritised unresolved alerts by severity and age.
+
+    - Assigned selected alerts and changed their status
+      to In Progress before investigation.
+
+    - Examined the available alert details and supporting
+      indicators to assess whether activity was malicious.
+
+    - Selected the appropriate verdict, documented
+      the decision, and closed the alerts in the
+      simulated dashboard.
+
+
+------------------------------------------------------------
+  3. KEY FINDINGS
+------------------------------------------------------------
+
+    - Alert severity helps prioritise work, but context
+      and supporting evidence are essential.
+
+    - Suspicious-looking activity is not always malicious.
+
+    - File extensions, hashes, and repository legitimacy
+      can help validate an alert.
+
+    - Accurate classification and proper status updates
+      support consistent SOC operations.
+
+
+============================================================
+  END OF REPORT
+============================================================
+

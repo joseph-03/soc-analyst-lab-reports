@@ -1,0 +1,203 @@
+============================================================
+  SPLUNK LOG INGESTION AND SEARCH REPORT
+============================================================
+
+Analyst:   Joseph Biju
+Platform:  TryHackMe — SOC Level 1
+Room:      Splunk: The Basics
+Scope:     Splunk components, interface navigation, log
+           ingestion, and field-based searching of VPN
+           logs
+Method:    Identify Component > Ingest Data > Search by
+           Field > Filter > Interpret Results
+
+
+------------------------------------------------------------
+  1. SUMMARY
+------------------------------------------------------------
+
+This exercise introduced Splunk, one of the most widely used
+SIEM platforms for collecting, analysing, and correlating
+logs. The work covered the three core Splunk components,
+the layout of the web interface, and the process of ingesting
+a log file.
+
+In the practical, a VPN log file was uploaded into a Splunk
+instance as JSON, stored in a new index named VPN_Logs, and
+then searched using Splunk's Search Processing Language
+(SPL). The searches filtered events by user, source IP
+address, and country to answer investigative questions about
+the VPN activity.
+
+The exercise showed that an investigation depends on getting
+data in correctly first, and that field-based searches can
+turn a large log file into precise answers quickly.
+
+
+------------------------------------------------------------
+  2. PRACTICAL SCENARIO ANALYSIS
+------------------------------------------------------------
+
+  Scenario 1 — Splunk Component Identification
+
+  Indicators:
+    - Question: which component collects and sends data to
+      Splunk?
+    - Components reviewed: Forwarder, Indexer, Search Head
+
+  Assessment:
+    The Forwarder is a lightweight agent on the monitored
+    endpoint that collects data and sends it on. The
+    Indexer parses and normalises it into field-value
+    pairs and stores it as events. The Search Head, inside
+    the Search & Reporting app, is where analysts query the
+    indexed data using SPL. The Forwarder was the correct
+    answer for data collection.
+
+  Recommended Action:
+    Deploy forwarders on key log sources so data reaches
+    the indexer consistently.
+
+
+  Scenario 2 — Interface Navigation and Data Options
+
+  Indicators:
+    - Home screen sections: Splunk Bar, Apps Panel,
+      Explore Splunk, and Home Dashboard
+    - Add Data menu with several data source categories
+
+  Assessment:
+    The Splunk Bar gives access to messages, settings,
+    activity, help, and search, while Search & Reporting is
+    the default app. In the Add Data menu, the Monitor
+    option is used to collect data from files and ports.
+    Knowing the layout reduces time spent finding the right
+    tool during an investigation.
+
+  Recommended Action:
+    Learn where data inputs, apps, and dashboards are
+    located before starting investigations.
+
+
+  Scenario 3 — Log Ingestion: VPN Log File
+
+  Indicators:
+    - Log file: VPN_logs, uploaded with the Upload option
+    - Five-step process: select source, select source type,
+      input settings, review, done
+    - Source type: JSON
+    - Host value: VPN_Connections
+    - New index created: VPN_Logs
+
+  Assessment:
+    Choosing JSON as the source type let Splunk parse the
+    file into searchable fields such as UserName,
+    Source_ip, and Source_Country. After the upload, a
+    search over the index showed 2,862 events in the file.
+    Correct source type and index choices decide whether
+    searches work properly afterwards.
+
+  Recommended Action:
+    Verify the source type, host, and index before
+    submitting, then confirm the event count after
+    ingestion.
+
+
+  Scenario 4 — Field-Based Searches: User and IP
+
+  Indicators:
+    - Filter on UserName=Maleena
+    - Filter on Source_ip=107.14.182.38
+    - Filter on Source_ip=107.3.206.58
+
+  Assessment:
+    Filtering on user Maleena returned 60 events. Filtering
+    on source IP 107.14.182.38 showed that it belonged to
+    the user Smith, and searching IP 107.3.206.58 returned
+    14 VPN events. These searches mirror real tasks, such
+    as seeing everything a user did, tracing an IP to an
+    account, or checking how often a suspicious address
+    connected.
+
+  Recommended Action:
+    Pivot between user and IP fields to build a picture of
+    who connected, from where, and how often.
+
+
+  Scenario 5 — Exclusion Search: Country Filter
+
+  Indicators:
+    - Search using Source_Country!=France
+
+  Assessment:
+    Excluding France left 2,814 events from all other
+    countries, which implies 48 events came from France
+    out of 2,862 total. Exclusion searches help surface
+    unusual origins by removing expected activity first.
+
+  Recommended Action:
+    Use exclusion filters to isolate unexpected locations,
+    then investigate those events further.
+
+
+------------------------------------------------------------
+  3. KEY FINDINGS
+------------------------------------------------------------
+
+  - Splunk's three components work as a pipeline: the
+    forwarder collects, the indexer processes and stores,
+    and the search head lets analysts query.
+
+  - Correct ingestion is the foundation of every search.
+    A wrong source type or index can hide or break fields.
+
+  - Field-value searches on user, IP, and country answer
+    typical investigative questions in seconds.
+
+  - Results gain meaning only with context. An event count
+    or an IP-to-user match needs comparison with what is
+    normal for that environment.
+
+  - Exclusion searches (!=) are useful for removing normal
+    activity and highlighting what is unusual.
+
+
+------------------------------------------------------------
+  4. RECOMMENDED SECURITY CONTROLS
+------------------------------------------------------------
+
+  Preventive Controls:
+    Standardise log formats and source types, protect log
+    files and indexes from tampering, and restrict access
+    to the Splunk instance to authorised analysts.
+
+  Detective Controls:
+    Ingest VPN and other key logs into Splunk, create
+    searches or alerts for unusual countries, repeated
+    connections from one IP, and unexpected user activity,
+    and build dashboards for regular review.
+
+  Response Measures:
+    When an unusual user, IP, or country appears, pivot
+    across related fields, confirm with the account owner,
+    block or disable suspicious access, and document the
+    findings.
+
+
+------------------------------------------------------------
+  5. CONCLUSION
+------------------------------------------------------------
+
+The exercise demonstrated the complete basic workflow in
+Splunk: understanding the components, navigating the
+interface, ingesting a VPN log file correctly, and
+searching it by user, IP address, and country. The searches
+showed how a large set of raw events can be narrowed to
+specific answers, and that correct ingestion is what makes
+that possible. These skills are the base for the more
+advanced SPL and incident investigation work that follows
+in the learning path.
+
+============================================================
+  END OF REPORT
+============================================================

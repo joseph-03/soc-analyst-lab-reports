@@ -1,0 +1,128 @@
+============================================================
+  SOC ALERT REPORTING AND ESCALATION ASSESSMENT
+============================================================
+
+Analyst:   Joseph Biju
+Platform:  TryHackMe — SOC Level 1
+Room:      SOC L1 Alert Reporting
+Scope:     Practical analysis of security alerts, report
+           preparation, escalation, and communication
+Method:    Review evidence > Document findings >
+           Assess risk > Escalate if required
+
+
+------------------------------------------------------------
+  1. SUMMARY
+------------------------------------------------------------
+
+This exercise examined how SOC Level 1 analysts document
+security alerts, communicate investigation findings, and
+escalate potentially serious threats to senior analysts.
+
+The practical scenarios involved a sensitive document
+shared externally and a suspicious email marked as
+phishing after delivery. The exercise highlighted the
+importance of structured reporting, evidence-based
+analysis, and timely escalation.
+
+
+------------------------------------------------------------
+  2. PRACTICAL SCENARIO ANALYSIS
+------------------------------------------------------------
+
+  Scenario 1 — Sensitive Document Shared Externally
+
+  Indicators:
+    - Alert identified as "Sensitive Document Share to External"
+    - Source user and document-sharing activity required review
+    - Potential exposure of sensitive organisational data
+
+  Assessment:
+    External sharing of a sensitive document may result
+    in unauthorised disclosure. The user and activity
+    details must be reviewed to understand the context
+    and determine whether the sharing was authorised.
+
+  Recommended Action:
+    Document the source user, relevant activity, and
+    available evidence. Escalate the alert if unauthorised
+    disclosure or further investigation is suspected.
+
+
+  Scenario 2 — Phishing Email Detected After Delivery
+
+  Indicators:
+    - Email flagged as phishing after delivery
+    - Sender claimed to be Microsoft support
+    - Email authentication checks showed failures
+    - Urgency-based wording and an archive attachment
+      raised additional concerns
+
+  Assessment:
+    The combination of failed email authentication checks
+    and suspicious message characteristics suggests
+    possible sender spoofing and a phishing attempt.
+
+  Recommended Action:
+    Prepare an alert report using the Five Ws:
+    Who, What, When, Where, and Why. Include the sender,
+    relevant email details, supporting indicators, and
+    the reasoning behind the verdict. Escalate for
+    further investigation when required.
+
+
+------------------------------------------------------------
+  3. KEY FINDINGS
+------------------------------------------------------------
+
+  - Alert reports preserve investigation context and
+    help senior analysts continue the investigation.
+
+  - The Five Ws provide a structured way to record
+    relevant users, actions, timestamps, locations,
+    and reasoning.
+
+  - Failed email authentication checks can indicate
+    spoofing when considered alongside other evidence.
+
+  - Potential data exposure and phishing incidents
+    require appropriate assessment and documentation.
+
+  - Clear escalation and communication help ensure
+    that serious alerts receive timely attention.
+
+
+------------------------------------------------------------
+  4. RECOMMENDED SECURITY CONTROLS
+------------------------------------------------------------
+
+  Preventive Controls:
+    Apply appropriate data-sharing permissions, access
+    restrictions, and email authentication protections.
+
+  Detective Controls:
+    Monitor external document sharing, suspicious email
+    activity, and email authentication failures.
+
+  Response Measures:
+    Document evidence, record the alert verdict, escalate
+    serious or unclear cases to the appropriate analyst,
+    and coordinate with relevant teams when necessary.
+
+
+------------------------------------------------------------
+  5. CONCLUSION
+------------------------------------------------------------
+
+The exercise demonstrated that alert reporting is an
+important part of SOC operations, extending beyond
+identifying suspicious activity. Structured reports,
+evidence-based reasoning, timely escalation, and clear
+communication help senior analysts understand potential
+threats and determine the appropriate response.
+
+
+============================================================
+  END OF REPORT
+============================================================
+

@@ -1,0 +1,132 @@
+============================================================
+ TRAFFIC INVESTIGATION REPORT
+============================================================
+
+Analyst:        Joseph Biju
+Analysis Date:  13-09-2026
+Engagement:     Network Traffic Capture Investigation
+Methodology:    Orient > Question > Filter > Follow > Compare > Document
+
+
+------------------------------------------------------------
+ 1. CAPTURE SUMMARY
+------------------------------------------------------------
+
+Source:          Wireshark sample capture "arp-storm.pcap"
+Total packets:   622
+Time span:       28 seconds
+Headline:        Capture contains a large volume of ARP request
+                 traffic sent as broadcasts from a single source
+                 MAC address. The traffic pattern is consistent
+                 with an ARP storm or excessive ARP scanning
+                 activity.
+
+
+------------------------------------------------------------
+ 2. ORIENTATION
+------------------------------------------------------------
+
+Top protocols (from Protocol Hierarchy):
+  - ARP — 100% of captured packets
+
+Busiest conversation (from Conversations, sorted by bytes):
+  - 00:07:0d:af:f4:54 <-> ff:ff:ff:ff:ff:ff,
+    622 packets, approximately 37 kB exchanged
+
+Notable endpoints (from Endpoints):
+  - 00:07:0d:af:f4:54 sent all 622 packets
+    to the Ethernet broadcast address
+    ff:ff:ff:ff:ff:ff.
+  - No return traffic was observed in the capture.
+
+
+------------------------------------------------------------
+ 3. INVESTIGATION
+------------------------------------------------------------
+
+Question chased:
+  Why is a single host generating a large number of ARP
+  broadcast requests to many different IP addresses within
+  a short period?
+
+Filters used:
+  arp
+  arp.opcode == 1
+
+What I found following the thread:
+  The capture contains 622 ARP packets, all sent from the same
+  source MAC address 00:07:0d:af:f4:54 to the broadcast
+  address ff:ff:ff:ff:ff:ff. The packets repeatedly contain
+  ARP "Who has" requests for many different IP addresses,
+  including addresses in the 24.166.x.x, 69.76.x.x and
+  65.28.x.x ranges. The capture lasts approximately 28.97
+  seconds, giving an average of about 21 ARP requests per
+  second.
+
+
+------------------------------------------------------------
+ 4. COMPARISON TO BASELINE
+------------------------------------------------------------
+
+Assessed against normal-traffic baseline and known attack
+patterns (port scan / suspicious DNS / beacon / plaintext):
+
+  [ ] Normal traffic — DNS precedes connections, clean
+      handshakes and teardowns, recognisable destinations
+  [ ] Port scan signature observed
+  [ ] Suspicious DNS observed
+  [ ] Beacon pattern observed
+  [ ] Plaintext exposure observed
+  [x] Other / unexplained
+
+Evidence for the box(es) checked:
+  The capture consists entirely of ARP traffic rather than
+  ordinary mixed network traffic. All 622 packets are broadcast
+  ARP requests from one source MAC address, with requests for
+  many different IP addresses and no corresponding response
+  traffic visible in the capture. The high rate of repeated
+  broadcast ARP requests over approximately 29 seconds is
+  consistent with an ARP storm or abnormal ARP request pattern.
+
+
+------------------------------------------------------------
+ 5. VERDICT AND CONFIDENCE
+------------------------------------------------------------
+
+Verdict:     ARP storm / abnormal ARP broadcast activity
+Confidence:  PROBABLE
+
+Reasoning:   The evidence strongly supports an abnormal ARP
+             traffic pattern. A single source generated 622
+             broadcast ARP requests within approximately
+             28.97 seconds, targeting many different IP
+             addresses. This is significantly different from
+             ordinary ARP traffic and is consistent with an
+             ARP storm or excessive ARP scanning behavior.
+             However, the capture alone does not establish
+             the exact cause or whether the activity was
+             malicious.
+
+
+------------------------------------------------------------
+ 6. RECOMMENDED NEXT STEPS
+------------------------------------------------------------
+
+If this were a real engagement:
+  [ ] Capture additional traffic from the same host to
+      determine whether the high-rate ARP activity continues
+
+  [ ] Identify the device associated with MAC address
+      00:07:0d:af:f4:54 and check its configuration and
+      network activity
+
+  [ ] Check switch logs and ARP tables to determine whether
+      other hosts were affected by the broadcast traffic
+
+  [ ] No exploitation or active probing should be performed
+      without authorization
+
+
+============================================================
+ END OF REPORT
+============================================================
